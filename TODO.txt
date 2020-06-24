@@ -1,5 +1,4 @@
-# Move AWS credentials from static configuration - Done 06/22/2020
+# Investigate potential to move IAM policy creations and permissions assignments from Lambda and API GW files to permissions file
 # Setup GIT repo for tf files for VC
 # Setup GIT workflow for test and prod automated deployment + rollback
 # Move local lambda code repo to GIT repo
-# Investigate potential to move IAM policy creations and permissions assignments from Lambda and API GW files to permissions file

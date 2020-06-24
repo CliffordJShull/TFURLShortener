@@ -9,4 +9,4 @@ exports.handler = function(event, context, callback) {
     body: '<p>Hello world!</p>'
   }
   callback(null, response)
-}
+};
