@@ -1,4 +1,4 @@
-# Top level rest api
+# Top level rest api creation
 resource "aws_api_gateway_rest_api" "tfurlshortener" {
   name        = "tfurlshortener"
   description = "Terraform URLShortener"
@@ -24,14 +24,14 @@ resource "aws_api_gateway_method" "proxy" {
  }
 
 # Integration for proxy resource
- resource "aws_api_gateway_integration" "lambda" {
+ resource "aws_api_gateway_integration" "lambda_proxy" {
    rest_api_id = aws_api_gateway_rest_api.tfurlshortener.id
    resource_id = aws_api_gateway_method.proxy.resource_id
    http_method = aws_api_gateway_method.proxy.http_method
 
    integration_http_method = "POST"
    type                    = "AWS_PROXY"
-   uri                     = aws_lambda_function.tfurlshortener.invoke_arn
+   uri                     = aws_lambda_function.tfurlshortener_redirect.invoke_arn
  }
 
 # Root "/" method GET
@@ -151,6 +151,8 @@ resource "aws_api_gateway_method" "proxy_root_POST" {
    resource_id   = aws_api_gateway_rest_api.tfurlshortener.root_resource_id
    http_method   = "POST"
    authorization = "NONE"
+   api_key_required = true
+   request_parameters = {"method.request.header.x-api-key" = true}
  }
 
  # Root "/" method POST integration
@@ -167,7 +169,7 @@ resource "aws_api_gateway_method" "proxy_root_POST" {
 # Deploy the API
  resource "aws_api_gateway_deployment" "tfurlshortener" {
    depends_on = [
-     aws_api_gateway_integration.lambda,
+     aws_api_gateway_integration.lambda_proxy,
      aws_api_gateway_integration.lambda_root_GET,
      aws_api_gateway_integration.lambda_root_POST
    ]
@@ -176,6 +178,7 @@ resource "aws_api_gateway_method" "proxy_root_POST" {
    stage_name  = "test"
  }
 
+### Post-Deployment actions
 # Set logging settings
 resource "aws_api_gateway_method_settings" "logging_setup" {
   depends_on = [
@@ -189,6 +192,28 @@ resource "aws_api_gateway_method_settings" "logging_setup" {
     data_trace_enabled = true
     metrics_enabled = false
   }
+}
+
+# Create Usageplan
+resource "aws_api_gateway_usage_plan" "tfurlshortener_usageplan" {
+  name = "tfurlshortener_usageplan"
+
+  api_stages {
+    api_id = aws_api_gateway_rest_api.tfurlshortener.id
+    stage  = aws_api_gateway_deployment.tfurlshortener.stage_name
+  }
+}
+
+# Create API Key
+resource "aws_api_gateway_api_key" "tfurlshortener_apikey" {
+  name = "tfurlshortener_apikey"
+}
+
+# Add Usage Plan and API/Stage to API Key
+resource "aws_api_gateway_usage_plan_key" "tfurlshortener_addusageplan" {
+  key_id        = aws_api_gateway_api_key.tfurlshortener_apikey.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.tfurlshortener_usageplan.id
 }
 
 # Returns api gw invoke url for testing
