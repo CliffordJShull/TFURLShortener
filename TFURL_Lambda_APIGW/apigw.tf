@@ -220,3 +220,7 @@ resource "aws_api_gateway_usage_plan_key" "tfurlshortener_addusageplan" {
 output "base_url" {
   value = aws_api_gateway_deployment.tfurlshortener.invoke_url
 }
+
+output "api_key" {
+  value = aws_api_gateway_api_key.tfurlshortener_apikey.value
+}
