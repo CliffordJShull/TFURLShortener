@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+    <html itemtype="http://schema.org/WebPage" lang="en">
+    <head>
+    <meta charset="utf-8"/>
+    <title>
+        Tiny URL
+    </title>
+    </head>
+    <body>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $('#submit').click(function(e) {
+            e.preventDefault();
+     
+            var urlData = $('#urltext').val();
+            var apiKey = $('#apikey').val();
+            var headersData = {'X-Api-Key': apiKey, 'url': urlData};
+     
+            $.ajax({
+                type: "POST",
+                url: window.location.pathname,
+                headers: headersData,
+                contentType: "application/json; charset=utf-8",
+                dataType: 'text',
+                success: function(response) {
+                  var hlink = '<a href="' + response + '" target="_blank">' + response + '</a>';
+                  $('#link').html(hlink);
+                  //alert('Your tiny URL has been generated and is shown under "Output"');
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    var rbody = xhr.responseJSON
+                    if(xhr.status==403) {
+                        alert('You shall not pass!');
+                    } else if(xhr.status==400) {
+                        alert('Something\'s amiss... Try again.');
+                    } else if(xhr.status==429 && rbody.message=="Limit Exceeded") {
+                        alert('You have exceeded the number of requests today.  Try again tomorrow.')
+                    } else if(xhr.status==429) {
+                        alert('You need to slowwwwww dowwwwwwwwn.')
+                    } else {
+                        alert('What did you break?');
+                    }
+                }
+            });
+        });
+    });
+    </script>
+     
+    <h1>Tiny URL</h1>
+    <textarea id="urltext" rows="8" cols="100" maxlength="400000" autocomplete="off" required autofocus></textarea>
+    <br/><br/>
+    <b>API Key:</b>
+    <textarea id="apikey" rows="1" cols="50" maxlength="50" required></textarea>
+    <br/><br/>
+    <button id="submit">Shrink It!</button>
+    <br/><br/>
+    <h2>Output:</h2>
+    <div id="link">Your tiny URL will appear here after you Shrink It!</div>
+    </body>
+    </html>

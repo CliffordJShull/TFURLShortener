@@ -1,4 +1,3 @@
 # Investigate potential to move IAM policy creations and permissions assignments from Lambda and API GW files to permissions file
-# Move inline templates to filename references without absolute pathing
 # Setup GIT workflow for test and prod automated deployment + rollback
 # Move local lambda code repo to GIT repo
